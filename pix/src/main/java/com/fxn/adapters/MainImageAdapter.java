@@ -1,6 +1,7 @@
 package com.fxn.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,6 +62,13 @@ public class MainImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return this;
     }
 
+    public MainImageAdapter addImage(int position, Img image) {
+        list.add(position, image);
+        notifyItemInserted(position);
+        notifyDataSetChanged();
+        return this;
+    }
+
     public void addOnSelectionListener(OnSelectionListener onSelectionListener) {
         this.onSelectionListener = onSelectionListener;
     }
@@ -114,6 +122,9 @@ public class MainImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         } else if (holder instanceof HeaderHolder) {
             HeaderHolder headerHolder = (HeaderHolder) holder;
             headerHolder.header.setText(image.getHeaderDate());
+        }
+        else{
+            Log.d("FUCKED", "onBindViewHolder: WHY HERE?");
         }
     }
 

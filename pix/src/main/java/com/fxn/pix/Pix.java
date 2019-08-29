@@ -148,7 +148,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
   private OnSelectionListener onSelectionListener = new OnSelectionListener() {
     @Override
     public void onClick(Img img, View view, int position) {
-      if (LongSelection) {
+      if (LongSelection || true) {
         if (selectionList.contains(img)) {
           selectionList.remove(img);
           initaliseadapter.select(false, position);
@@ -164,6 +164,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
           selectionList.add(img);
           initaliseadapter.select(true, position);
           mainImageAdapter.select(true, position);
+          changeSendButtonVisibility();
         }
         if (selectionList.size() == 0) {
           LongSelection = false;
@@ -215,18 +216,7 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
         Utility.vibe(Pix.this, 50);
         //Log.e("onLongClick", "onLongClick");
         LongSelection = true;
-        if ((selectionList.size() == 0) && (mBottomSheetBehavior.getState()
-            != BottomSheetBehavior.STATE_EXPANDED)) {
-          sendButton.setVisibility(View.VISIBLE);
-          Animation anim = new ScaleAnimation(
-              0f, 1f, // Start and end values for the X axis scaling
-              0f, 1f, // Start and end values for the Y axis scaling
-              Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
-              Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
-          anim.setFillAfter(true); // Needed to keep the result of the animation
-          anim.setDuration(300);
-          sendButton.startAnimation(anim);
-        }
+        changeSendButtonVisibility();
         if (selectionList.contains(img)) {
           selectionList.remove(img);
           initaliseadapter.select(false, position);
@@ -252,6 +242,43 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
       }
     }
   };
+
+  private void changeSendButtonVisibility() {
+    if (sendButton.getVisibility() == View.GONE && (mBottomSheetBehavior.getState()
+            != BottomSheetBehavior.STATE_EXPANDED)) {
+      sendButton.setVisibility(View.VISIBLE);
+      Animation anim = new ScaleAnimation(
+              0f, 1f, // Start and end values for the X axis scaling
+              0f, 1f, // Start and end values for the Y axis scaling
+              Animation.RELATIVE_TO_SELF, 0.5f, // Pivot point of X scaling
+              Animation.RELATIVE_TO_SELF, 0.5f); // Pivot point of Y scaling
+      anim.setFillAfter(true); // Needed to keep the result of the animation
+      anim.setDuration(300);
+      sendButton.startAnimation(anim);
+
+    }
+    selection_count.setText(
+            getResources().getString(R.string.pix_selected) + " " + selectionList.size());
+    img_count.setText(String.valueOf(selectionList.size()));
+  }
+
+  private void addCamImage(Img img){
+
+    for (Img image:
+            selectionList) {
+      int p = image.getPosition();
+      image.setPosition(p + 1);
+    }
+    img.setPosition(0);
+    selectionList.add(img);
+
+    initaliseadapter.addImage(0, img);
+    mainImageAdapter.addImage(0, img);
+    initaliseadapter.select(true, 0);
+    mainImageAdapter.select(true, 0);
+    instantRecyclerView.scrollToPosition(0);
+    changeSendButtonVisibility();
+  }
 
   private FrameLayout flash;
   private ImageView front;
@@ -520,11 +547,13 @@ public class Pix extends AppCompatActivity implements View.OnTouchListener {
                 File photo =
                     Utility.writeImage(bitmap, options.getPath(), options.getImageQuality(),
                         options.getWidth(), options.getHeight());
-                Img img = new Img("", "", photo.getAbsolutePath(), "");
-                selectionList.add(img);
+                Img img = new Img("", photo.getPath(), photo.getAbsolutePath(), "");
+                //selectionList.add(img);
                 Utility.scanPhoto(Pix.this, photo);
                 Log.e("click time", "--------------------------------2");
-                returnObjects();
+                //TODO: Add image to recycler
+                addCamImage(img);
+               // returnObjects();
               }
             }
             return null;
